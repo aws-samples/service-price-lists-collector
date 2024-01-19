@@ -8,7 +8,7 @@ build a single CSV document with all the information you need.
 
 * `git clone git@ssh.gitlab.aws.dev:lautip/aws-price-lists-collector.git`
 * Requires: python 3.9 to 3.11. Python3.12 is not supported by some dependencies.
-* `pip install requirements`
+* `pip install requirements.txt`
 * Configure the script ***fetch_aws_pricelists.py***
 * Make sure the terminal session you run this script from has credentials to an AWS Account
 * `python fetch_aws_pricelists.py`
