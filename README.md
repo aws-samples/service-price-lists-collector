@@ -15,5 +15,11 @@ build a single CSV document with all the information you need.
 
 Tip: you can easily run this script from a [Cloud9](https://aws.amazon.com/pm/cloud9) environment
 
+## What does this do?
+1. Optionally store a list of all available services as a JSON document in the current directory.#. 
+1. Fetch the price lists for the given regions and services (as received = raw)
+1. Remove the unused columns according to the list of Used Header and store each new truncated price list in a separate directory.
+1. Concatenate all the truncated price lists in a single CSV document.
+
 ## License
 This project is licensed under the Apache-2.0 License.

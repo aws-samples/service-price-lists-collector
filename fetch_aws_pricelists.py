@@ -198,12 +198,13 @@ def store_raw_price_lists(services_included, services_excluded, raw_csv_dir, reg
     :param set services_included: Services to include
     :param set services_excluded: Services to exclude
     :param str raw_csv_dir: location of the raw CSV price list files
-    :param list regions: list of regions to fetch
+    :param set regions: list of regions to fetch
     :param str currency: currency to use
     :param datetime date: validity date of the price list
     :param int nb_workers: Number of threads to launch - avoid increasing due to Throttling by the API
     :return: None
     """
+    print("\nStating to fetch price lists")
     all_services = {service['ServiceCode'] for service in describe_services()}
     if services_included:
         service_codes = all_services.intersection(services_included)
@@ -226,8 +227,11 @@ def store_raw_price_lists(services_included, services_excluded, raw_csv_dir, reg
             count += 1
             count_lists += future.result()
             print("{} pairs (region, service) processed.".format(count), end="\r")
-    print("\n")
-    print("{} tariff lists found".format(count_lists))
+    if count_lists > 0:
+        print("\n")
+        print("{} price lists found".format(count_lists))
+    else:
+        print("!!! WARNING: No price list found !!!\n")
 
 
 def truncate_raw_list(raw_csv_dir, truncated_csv_dir, used_headers):
@@ -254,6 +258,8 @@ def truncate_raw_list(raw_csv_dir, truncated_csv_dir, used_headers):
             data.drop(labels=list(discard), axis=1, inplace=True)
             data.to_csv(trunc_path, index=False)
             print("Truncated files: {}".format(count), end='\r')
+    if not count > 0:
+        print("!!! WARNING: No price list found to truncate !!!")
     print("")
 
 
@@ -273,9 +279,13 @@ def consolidate_all_tariffs(truncated_csv_dir, consolidated_csv_dir, date):
         if os.path.isfile(trunc_path) and f.endswith(".csv"):
             tariffs.append(pd.read_csv(trunc_path))
             print("Consolidation: {}".format(len(tariffs)), end='\r')
-    print("")
     consolidated_path = os.path.join(consolidated_csv_dir, "aws-tariffs-{}.csv".format(date.strftime("%y-%m-%d")))
-    pd.concat(tariffs, ignore_index=True).to_csv(consolidated_path, index=False)
+    if tariffs:
+        print("")
+        pd.concat(tariffs, ignore_index=True).to_csv(consolidated_path, index=False)
+        print("{} price lists consolidate  in a single document".format(len(tariffs)))
+    else:
+        print("!!! WARNING: no price list found to concatenate !!!")
 
 
 def get_all_regions():
@@ -314,7 +324,7 @@ if __name__ == '__main__':
     # The services to consider
     SERVICES_INCLUDED = set()  # If empty all the services in the regions will be fetched
     # Example how to limit the number of services fetched
-    # SERVICES_INCLUDED.update(['awskms', 'AmazonEC2'])
+    SERVICES_INCLUDED.update(['awskms', 'AmazonEC2'])
     SERVICES_EXCLUDED = set()  # Only used if services_included is empty
     # Example how to exclude some of the services.
     # SERVICES_EXCLUDED.update(['awskms', 'AmazonEC2'])
@@ -328,14 +338,20 @@ if __name__ == '__main__':
     
     Not included: China (cn-north-1, cn-northwest-1) and Government Cloud (us-gov-east-1, us-gov-west-1)
     """
-    # List of AWS Regions to fetch prices for
-    REGIONS = ['us-east-1', 'eu-central-1']
     # You can get a fresh list of all the regions for your account with:
     # REGIONS = get_all_regions()
+    # Regions to use: leave empty set for all available regions
+    REGIONS_INCLUDED = set()
+    # Example how to limit the number of regions fetched
+    REGIONS_INCLUDED.update(['us-east-1', 'eu-central-1'])
+    # Regions to exclude: only considered if not empty and REGIONS_INCLUDED is empty
+    REGIONS_EXCLUDED = set()
+    # Example how to exclude some of the services.
+    # REGIONS_EXCLUDED.update(['ap-northeast-1'])
 
     # What to do
     STORE_AWS_SERVICES_CODES_AS_JSON = False
-    FETCH_RAW_PRICE_LIST = True
+    FETCH_RAW_PRICE_LISTS = True
     TRUNCATE_RAW_PRICE_LISTS = True
     CONSOLIDATE_TRUNCATED_PRICE_LISTS = True
     '''CONFIGURATION SECTION ENDS HERE'''
@@ -345,10 +361,17 @@ if __name__ == '__main__':
     TRUNCATED_CSV_DIR = os.path.normpath(TRUNCATED_CSV_DIR)
     CONSOLIDATED_CSV_DIR = os.path.normpath(CONSOLIDATED_CSV_DIR)
 
+    # Build a list for regions to process
+    REGIONS = set(get_all_regions())
+    if REGIONS_INCLUDED:
+        REGIONS = REGIONS.intersection(REGIONS_INCLUDED)
+    elif REGIONS_EXCLUDED:
+        REGIONS = REGIONS.difference(REGIONS_EXCLUDED)
+
     if STORE_AWS_SERVICES_CODES_AS_JSON is True:
         describe_services(True)
 
-    if FETCH_RAW_PRICE_LIST is True:
+    if FETCH_RAW_PRICE_LISTS is True:
         store_raw_price_lists(services_included=SERVICES_INCLUDED,
                               services_excluded=SERVICES_EXCLUDED,
                               raw_csv_dir=RAW_CSV_DIR,
@@ -365,4 +388,4 @@ if __name__ == '__main__':
         consolidate_all_tariffs(truncated_csv_dir=TRUNCATED_CSV_DIR,
                                 consolidated_csv_dir=CONSOLIDATED_CSV_DIR,
                                 date=DATE)
-    print("Goodbye!")
+    print("\nGoodbye!")
