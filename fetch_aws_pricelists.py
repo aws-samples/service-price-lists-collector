@@ -283,7 +283,7 @@ def consolidate_all_tariffs(truncated_csv_dir, consolidated_csv_dir, date):
     if tariffs:
         print("")
         pd.concat(tariffs, ignore_index=True).to_csv(consolidated_path, index=False)
-        print("{} price lists consolidate  in a single document".format(len(tariffs)))
+        print("{} price lists consolidated in a single document".format(len(tariffs)))
     else:
         print("!!! WARNING: no price list found to concatenate !!!")
 
