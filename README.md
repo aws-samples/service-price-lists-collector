@@ -22,4 +22,4 @@ Tip: you can easily run this script from a [Cloud9](https://aws.amazon.com/pm/cl
 1. Concatenate all the truncated price lists in a single CSV document.
 
 ## License
-This project is licensed under the Apache-2.0 License.
+This project is licensed under the MIT-0 license. See [License document](LICENSE).
