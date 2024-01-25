@@ -21,5 +21,8 @@ Tip: you can easily run this script from a [Cloud9](https://aws.amazon.com/pm/cl
 1. Remove the unused columns according to the list of Used Header and store each new truncated price list in a separate directory.
 1. Concatenate all the truncated price lists in a single CSV document.
 
+## Security
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
 ## License
 This project is licensed under the MIT-0 license. See [License document](LICENSE).
