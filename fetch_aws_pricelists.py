@@ -51,10 +51,10 @@ def describe_services(store_as_json=False):
     for page in page_iterator:
         services += page['Services']
     if store_as_json is True:
-        filename = "aws_services_list.json"
+        filename = "../aws_services_list.json"
         payload = [service['ServiceCode'] for service in services]
         json.dump(payload, open(filename, "w"))
-        print("List of {} AWS services stored in your local folder under the name {}.".format(len(payload), filename))
+        print("List of {} AWS services stored here: {}.".format(len(payload), filename))
     return services
 
 
@@ -207,7 +207,7 @@ def store_raw_price_lists(services_included, services_excluded, raw_csv_dir, reg
     :param int nb_workers: Number of threads to launch - avoid increasing due to Throttling by the API
     :return: None
     """
-    print("\nStating to fetch price lists")
+    print("\nStating to fetch price lists into {}".format(raw_csv_dir))
     all_services = {service['ServiceCode'] for service in describe_services()}
     if services_included:
         service_codes = all_services.intersection(services_included)
@@ -245,7 +245,7 @@ def truncate_raw_list(raw_csv_dir, truncated_csv_dir, used_headers):
     :param set used_headers: a set of price list properties to collect
     :return: None
     """
-    print("Starting truncating CSV files")
+    print("Starting truncating CSV files into {}".format(truncated_csv_dir))
     os.makedirs(truncated_csv_dir, exist_ok=True)
     count = 0
     for f in os.listdir(raw_csv_dir):
@@ -274,7 +274,7 @@ def consolidate_all_tariffs(truncated_csv_dir, consolidated_csv_dir, date):
     :param datetime date: validity date of the price lists
     :return: None
     """
-    print("Starting consolidation of truncated files")
+    print("Starting consolidation of truncated files into {}".format(consolidated_csv_dir))
     os.makedirs(consolidated_csv_dir, exist_ok=True)
     tariffs = []
     for f in os.listdir(truncated_csv_dir):
@@ -311,9 +311,9 @@ def get_all_regions():
 if __name__ == '__main__':
     '''CONFIGURATION SECTION STARTS HERE'''
     # Documents storage locations
-    RAW_CSV_DIR = "raw_csv"
-    TRUNCATED_CSV_DIR = "truncated_csv"
-    CONSOLIDATED_CSV_DIR = "consolidated_csv"
+    RAW_CSV_DIR = "../raw_csv"
+    TRUNCATED_CSV_DIR = "../truncated_csv"
+    CONSOLIDATED_CSV_DIR = "../consolidated_csv"
 
     # The properties of the price lists to collect. Those will be headers of the Consolidated CSV
     USED_HEADERS = {"SKU", "PriceDescription", "Unit", "RateCode", "serviceCode", "serviceName", "Product Family",
@@ -325,15 +325,16 @@ if __name__ == '__main__':
     CURRENCY = 'USD'
 
     # The services to consider
-    SERVICES_INCLUDED = set()  # If empty all the services in the regions will be fetched
-    # Example how to limit the number of services fetched
+    SERVICES_INCLUDED = set()  # If the set is empty all the services in the regions will be fetched
+    # Limit the number of services fetched below. Comment the line below for all services.
     SERVICES_INCLUDED.update(['awskms', 'AmazonEC2'])
-    SERVICES_EXCLUDED = set()  # Only used if services_included is empty
-    # Example how to exclude some of the services.
+    # Exclude services - only considered if services_included is empty
+    SERVICES_EXCLUDED = set()
+    # Example how to exclude some of the services. Uncomment and edit the line below
     # SERVICES_EXCLUDED.update(['awskms', 'AmazonEC2'])
 
     """
-    List of all available regions as of 2024/01/23 
+    List of all available regions as of 2024/01/23 ,for information
     ['af-south-1', 'ap-east-1', 'ap-northeast-1', 'ap-northeast-2', 'ap-northeast-3', 'ap-south-1', 'ap-south-2', 
     'ap-southeast-1', 'ap-southeast-2', 'ap-southeast-3', 'ap-southeast-4', 'ca-central-1', 'ca-west-1', 'eu-central-1', 
     'eu-central-2', 'eu-north-1', 'eu-south-1', 'eu-south-2', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'il-central-1', 
@@ -341,19 +342,20 @@ if __name__ == '__main__':
     
     Not included: China (cn-north-1, cn-northwest-1) and Government Cloud (us-gov-east-1, us-gov-west-1)
     """
-    # You can get a fresh list of all the regions for your account with:
+    # You can get a fresh list of all the regions for your account by uncommenting the line below.
     # REGIONS = get_all_regions()
     # Regions to use: leave empty set for all available regions
     REGIONS_INCLUDED = set()
-    # Example how to limit the number of regions fetched
+    # Example how to limit the number of regions fetched. Comment the line below for all regions.
     REGIONS_INCLUDED.update(['us-east-1', 'eu-central-1'])
     # Regions to exclude: only considered if not empty and REGIONS_INCLUDED is empty
     REGIONS_EXCLUDED = set()
-    # Example how to exclude some of the services.
+    # Example how to exclude some of the services. Uncomment and edit the line below
     # REGIONS_EXCLUDED.update(['ap-northeast-1'])
 
-    # What to do
-    STORE_AWS_SERVICES_CODES_AS_JSON = False
+    # Set the following steps as True to enable or False to avoid executing. Useful to not fetch again all the prices
+    # lists when you only want to adjust the truncation and/or consolidation
+    STORE_AWS_SERVICES_CODES_AS_JSON = True
     FETCH_RAW_PRICE_LISTS = True
     TRUNCATE_RAW_PRICE_LISTS = True
     CONSOLIDATE_TRUNCATED_PRICE_LISTS = True

@@ -6,12 +6,21 @@ build a single CSV document with all the information you need.
 
 ## Getting started
 
-* `git clone git@github.com:aws-samples/service-price-lists-collector.git`
-* Requires: python 3.9 to 3.11. Python3.12 is not supported by some dependencies.
-* `pip install requirements.txt`
-* Configure the script ***fetch_aws_pricelists.py***
+`git clone https://github.com/aws-samples/service-price-lists-collector.git`
+
+Requires: python 3.9 to 3.11. Python3.12 is not supported by some dependencies.
+
+```
+cd service-price-lists-collector
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+* Configure the script ***fetch_aws_pricelists.py*** (starts at the line containing 'CONFIGURATION SECTION STARTS HERE')
 * Make sure the terminal session you run this script from has credentials to an AWS Account
-* `python fetch_aws_pricelists.py`
+
+`python3 fetch_aws_pricelists.py`
 
 Tip: you can easily run this script from a [Cloud9](https://aws.amazon.com/pm/cloud9) environment
 
