@@ -9,5 +9,5 @@ EXTERNAL DEPENDENCIES
 "boto3" - "Apache License 2.0"
 "requests" - "Apache-2.0"
 "pandas" = "BSD 3-Clause"
-
-
+"click" = "BSD 3-Clause"
+"openpyxl" = "MIT License"
